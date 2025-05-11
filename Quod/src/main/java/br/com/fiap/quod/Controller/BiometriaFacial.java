@@ -1,11 +1,10 @@
 package br.com.fiap.quod.Controller;
 
+import br.com.fiap.quod.Service.NotificacaoService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.HashMap;
@@ -15,8 +14,11 @@ import java.util.Map;
 @RequestMapping("/api/biometria/facial")
 public class BiometriaFacial {
 
-    @PostMapping
-    public ResponseEntity<Map<String, String>> validarBiometriaFacial(@RequestParam("imagem") MultipartFile imagem) {
+    @Autowired
+    private NotificacaoService notificacaoService;
+
+    @PostMapping("/capturar")
+    public ResponseEntity<Map<String, String>> capturarFace(@RequestParam("imagem") MultipartFile imagem) {
         Map<String, String> response = new HashMap<>();
 
         if (imagem.isEmpty()) {
@@ -25,31 +27,27 @@ public class BiometriaFacial {
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
 
-        // Validação básica: verificar formato e tamanho
         if (!imagem.getContentType().startsWith("image/")) {
             response.put("status", "erro");
             response.put("mensagem", "Arquivo não é uma imagem válida.");
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
 
-        // Simulação de detecção de fraude (placeholder)
-        boolean fraudeDetectada = detectarFraude(imagem);
+        // Simulação de validação da biometria facial
+        boolean fraudeDetectada = false; // Para simulação
 
         if (fraudeDetectada) {
+            notificacaoService.notificarFraude("Biometria facial não reconhecida.");
             response.put("status", "fraude");
-            response.put("mensagem", "Possível tentativa de fraude detectada.");
-            response.put("detalhes", "Imagem identificada como deepfake.");
+            response.put("mensagem", "Biometria facial não reconhecida.");
             return new ResponseEntity<>(response, HttpStatus.OK);
         }
 
+        notificacaoService.notificarSucesso("Biometria facial capturada com sucesso.");
         response.put("status", "sucesso");
-        response.put("mensagem", "Imagem facial validada com sucesso.");
+        response.put("mensagem", "Biometria facial capturada com sucesso.");
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
-
-    private boolean detectarFraude(MultipartFile imagem) {
-        // Lógica simulada de detecção de fraude (deepfake, máscara, etc.)
-        return false;
-    }
 }
+
 

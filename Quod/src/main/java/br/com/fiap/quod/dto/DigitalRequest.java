@@ -1,32 +1,32 @@
 package br.com.fiap.quod.dto;
 
 public class DigitalRequest {
-    private String imagemBase64;
-    private String dispositivo;
-    private String dataCaptura;
+    private String digitalBase64;
+    private String tipoDigital;
 
-    // Getters e Setters
-    public String getImagemBase64() {
-        return imagemBase64;
+    // Getters e setters
+    public String getDigitalBase64() {
+        return digitalBase64;
     }
 
-    public void setImagemBase64(String imagemBase64) {
-        this.imagemBase64 = imagemBase64;
+    public void setDigitalBase64(String digitalBase64) {
+        this.digitalBase64 = digitalBase64;
     }
 
-    public String getDispositivo() {
-        return dispositivo;
+    public String getTipoDigital() {
+        return tipoDigital;
     }
 
-    public void setDispositivo(String dispositivo) {
-        this.dispositivo = dispositivo;
+    public void setTipoDigital(String tipoDigital) {
+        this.tipoDigital = tipoDigital;
     }
 
-    public String getDataCaptura() {
-        return dataCaptura;
-    }
-
-    public void setDataCaptura(String dataCaptura) {
-        this.dataCaptura = dataCaptura;
+    // Método auxiliar para limpar o base64
+    public String cleanBase64() {
+        if (this.digitalBase64 != null && this.digitalBase64.contains("data:image")) {
+            return this.digitalBase64.split(",")[1];
+        }
+        return this.digitalBase64;
     }
 }
+

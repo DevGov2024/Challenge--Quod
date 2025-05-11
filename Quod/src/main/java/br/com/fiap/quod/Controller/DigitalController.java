@@ -1,11 +1,12 @@
 package br.com.fiap.quod.Controller;
 
+import br.com.fiap.quod.Service.NotificacaoService;
+import br.com.fiap.quod.Service.ValidacaoAvancadaService;
+import br.com.fiap.quod.Service.ValidacaoImagemService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.HashMap;
@@ -15,42 +16,35 @@ import java.util.Map;
 @RequestMapping("/api/biometria/digital")
 public class DigitalController {
 
-    @PostMapping
-    public ResponseEntity<Map<String, String>> validarImpressaoDigital(@RequestParam("imagem") MultipartFile imagem) {
+    @Autowired
+    private NotificacaoService notificacaoService;
+
+    @Autowired
+    private ValidacaoImagemService validacaoImagemService;
+
+    @Autowired
+    private ValidacaoAvancadaService validacaoAvancadaService;
+
+    @PostMapping("/capturar")
+    public ResponseEntity<Map<String, String>> capturarDigital(@RequestParam("imagem") MultipartFile imagem) {
         Map<String, String> response = new HashMap<>();
 
-        if (imagem.isEmpty()) {
+        if (!validacaoImagemService.validarImagem(imagem)) {
             response.put("status", "erro");
-            response.put("mensagem", "Arquivo de impressão digital não fornecido.");
+            response.put("mensagem", "Imagem inválida (formato, tamanho ou resolução).");
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
 
-        // Validação básica: verificar formato e tamanho
-        if (!imagem.getContentType().startsWith("image/")) {
-            response.put("status", "erro");
-            response.put("mensagem", "Arquivo não é uma imagem válida.");
-            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
-        }
-
-        // Simulação de detecção de fraude (placeholder)
-        boolean fraudeDetectada = detectarFraude(imagem);
-
-        if (fraudeDetectada) {
+        if (validacaoAvancadaService.validarFraude(imagem)) {
+            notificacaoService.notificarFraude("Biometria digital suspeita de fraude.");
             response.put("status", "fraude");
-            response.put("mensagem", "Possível tentativa de fraude detectada.");
-            response.put("detalhes", "Imagem identificada como impressão digital falsa.");
+            response.put("mensagem", "Biometria digital suspeita de fraude.");
             return new ResponseEntity<>(response, HttpStatus.OK);
         }
 
+        notificacaoService.notificarSucesso("Biometria digital capturada com sucesso.");
         response.put("status", "sucesso");
-        response.put("mensagem", "Impressão digital validada com sucesso.");
+        response.put("mensagem", "Biometria digital capturada com sucesso.");
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
-
-    private boolean detectarFraude(MultipartFile imagem) {
-        // Lógica simulada de detecção de fraude (deepfake, impressão falsa, etc.)
-        return false;
-    }
 }
-
-

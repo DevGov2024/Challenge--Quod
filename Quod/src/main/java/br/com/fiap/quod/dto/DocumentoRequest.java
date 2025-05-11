@@ -1,16 +1,16 @@
 package br.com.fiap.quod.dto;
 
 public class DocumentoRequest {
-    private String nome;
+    private String documentoBase64;
     private String tipoDocumento;
 
     // Getters e setters
-    public String getNome() {
-        return nome;
+    public String getDocumentoBase64() {
+        return documentoBase64;
     }
 
-    public void setNome(String nome) {
-        this.nome = nome;
+    public void setDocumentoBase64(String documentoBase64) {
+        this.documentoBase64 = documentoBase64;
     }
 
     public String getTipoDocumento() {
@@ -21,3 +21,4 @@ public class DocumentoRequest {
         this.tipoDocumento = tipoDocumento;
     }
 }
+
