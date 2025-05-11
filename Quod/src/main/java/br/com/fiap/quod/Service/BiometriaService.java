@@ -1,8 +1,8 @@
-package br.com.fiap.Quod.Service;
+package br.com.fiap.quod.Service;
 
 
 import org.springframework.stereotype.Service;
-import br.com.fiap.Quod.dto.BiometriaRequest;
+import br.com.fiap.quod.dto.BiometriaRequest;
 
 @Service
 public class BiometriaService {

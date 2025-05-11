@@ -1,9 +1,7 @@
-package br.com.fiap.Quod.dto;
+package br.com.fiap.quod.dto;
 
-
-public class BiometriaRequest {
+public class DigitalRequest {
     private String imagemBase64;
-    private String tipoBiometria;
     private String dispositivo;
     private String dataCaptura;
 
@@ -14,14 +12,6 @@ public class BiometriaRequest {
 
     public void setImagemBase64(String imagemBase64) {
         this.imagemBase64 = imagemBase64;
-    }
-
-    public String getTipoBiometria() {
-        return tipoBiometria;
-    }
-
-    public void setTipoBiometria(String tipoBiometria) {
-        this.tipoBiometria = tipoBiometria;
     }
 
     public String getDispositivo() {

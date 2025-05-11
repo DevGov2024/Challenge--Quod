@@ -1,4 +1,4 @@
-package br.com.fiap.Quod.Model;
+package br.com.fiap.quod.Model;
 
 
 

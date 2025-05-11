@@ -1,8 +1,8 @@
-package br.com.fiap.Quod.Service;
+package br.com.fiap.quod.Service;
 
 
 import org.springframework.stereotype.Service;
-import br.com.fiap.Quod.dto.DigitalRequest;
+import br.com.fiap.quod.dto.DigitalRequest;
 
 @Service
 public class DigitalService {
