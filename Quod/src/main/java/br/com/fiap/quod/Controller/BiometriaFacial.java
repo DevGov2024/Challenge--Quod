@@ -1,6 +1,8 @@
 package br.com.fiap.quod.Controller;
 
 import br.com.fiap.quod.Service.NotificacaoService;
+import br.com.fiap.quod.Service.ValidacaoAvancadaService;
+import br.com.fiap.quod.Service.ValidacaoImagemService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,29 +19,26 @@ public class BiometriaFacial {
     @Autowired
     private NotificacaoService notificacaoService;
 
+    @Autowired
+    private ValidacaoImagemService validacaoImagemService;
+
+    @Autowired
+    private ValidacaoAvancadaService validacaoAvancadaService;
+
     @PostMapping("/capturar")
     public ResponseEntity<Map<String, String>> capturarFace(@RequestParam("imagem") MultipartFile imagem) {
         Map<String, String> response = new HashMap<>();
 
-        if (imagem.isEmpty()) {
+        if (!validacaoImagemService.validarImagem(imagem)) {
             response.put("status", "erro");
-            response.put("mensagem", "Arquivo de imagem não fornecido.");
+            response.put("mensagem", "Imagem inválida (formato, tamanho ou resolução).");
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
 
-        if (!imagem.getContentType().startsWith("image/")) {
-            response.put("status", "erro");
-            response.put("mensagem", "Arquivo não é uma imagem válida.");
-            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
-        }
-
-        // Simulação de validação da biometria facial
-        boolean fraudeDetectada = false; // Para simulação
-
-        if (fraudeDetectada) {
-            notificacaoService.notificarFraude("Biometria facial não reconhecida.");
+        if (validacaoAvancadaService.validarFraude(imagem)) {
+            notificacaoService.notificarFraude("Biometria facial suspeita de fraude.");
             response.put("status", "fraude");
-            response.put("mensagem", "Biometria facial não reconhecida.");
+            response.put("mensagem", "Biometria facial suspeita de fraude.");
             return new ResponseEntity<>(response, HttpStatus.OK);
         }
 
