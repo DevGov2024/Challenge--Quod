@@ -3,6 +3,7 @@ package br.com.fiap.quod.Controller;
 import br.com.fiap.quod.Service.NotificacaoService;
 import br.com.fiap.quod.Service.ValidacaoAvancadaService;
 import br.com.fiap.quod.Service.ValidacaoImagemService;
+import br.com.fiap.quod.Service.PersistenciaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,6 +26,9 @@ public class BiometriaFacial {
     @Autowired
     private ValidacaoAvancadaService validacaoAvancadaService;
 
+    @Autowired
+    private PersistenciaService persistenciaService;
+
     @PostMapping("/capturar")
     public ResponseEntity<Map<String, String>> capturarFace(@RequestParam("imagem") MultipartFile imagem) {
         Map<String, String> response = new HashMap<>();
@@ -35,18 +39,22 @@ public class BiometriaFacial {
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
 
-        if (validacaoAvancadaService.validarFraude(imagem)) {
-            notificacaoService.notificarFraude("Biometria facial suspeita de fraude.");
+        boolean fraude = validacaoAvancadaService.validarFraude(imagem);
+        String mensagem = fraude ? "Biometria facial suspeita de fraude." : "Biometria facial capturada com sucesso.";
+
+        // Persistir o resultado no banco de dados
+        persistenciaService.salvarValidacao("facial", fraude, mensagem);
+
+        if (fraude) {
+            notificacaoService.notificarFraude(mensagem);
             response.put("status", "fraude");
-            response.put("mensagem", "Biometria facial suspeita de fraude.");
-            return new ResponseEntity<>(response, HttpStatus.OK);
+        } else {
+            notificacaoService.notificarSucesso(mensagem);
+            response.put("status", "sucesso");
         }
 
-        notificacaoService.notificarSucesso("Biometria facial capturada com sucesso.");
-        response.put("status", "sucesso");
-        response.put("mensagem", "Biometria facial capturada com sucesso.");
+        response.put("mensagem", mensagem);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }
-
 

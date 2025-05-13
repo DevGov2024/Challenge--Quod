@@ -1,6 +1,7 @@
 package br.com.fiap.quod.Controller;
 
 import br.com.fiap.quod.Service.NotificacaoService;
+import br.com.fiap.quod.Service.PersistenciaService;
 import br.com.fiap.quod.Service.ValidacaoAvancadaService;
 import br.com.fiap.quod.Service.ValidacaoImagemService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +26,9 @@ public class DigitalController {
     @Autowired
     private ValidacaoAvancadaService validacaoAvancadaService;
 
+    @Autowired
+    private PersistenciaService persistenciaService;
+
     @PostMapping("/capturar")
     public ResponseEntity<Map<String, String>> capturarDigital(@RequestParam("imagem") MultipartFile imagem) {
         Map<String, String> response = new HashMap<>();
@@ -35,16 +39,21 @@ public class DigitalController {
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
 
-        if (validacaoAvancadaService.validarFraude(imagem)) {
-            notificacaoService.notificarFraude("Biometria digital suspeita de fraude.");
+        boolean fraude = validacaoAvancadaService.validarFraude(imagem);
+        String mensagem = fraude ? "Biometria digital suspeita de fraude." : "Biometria digital capturada com sucesso.";
+
+        // Persistir o resultado no banco de dados
+        persistenciaService.salvarValidacao("digital", fraude, mensagem);
+
+        if (fraude) {
+            notificacaoService.notificarFraude(mensagem);
             response.put("status", "fraude");
-            response.put("mensagem", "Biometria digital suspeita de fraude.");
-            return new ResponseEntity<>(response, HttpStatus.OK);
+        } else {
+            notificacaoService.notificarSucesso(mensagem);
+            response.put("status", "sucesso");
         }
 
-        notificacaoService.notificarSucesso("Biometria digital capturada com sucesso.");
-        response.put("status", "sucesso");
-        response.put("mensagem", "Biometria digital capturada com sucesso.");
+        response.put("mensagem", mensagem);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }
